@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: webflux-course
   data:
     mongodb:
       uri: ${URI}
