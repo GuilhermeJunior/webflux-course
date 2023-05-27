@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -61,5 +62,53 @@ class UserServiceTest {
                 .verify();
 
         Mockito.verify(userRepository, times(1)).findById(anyString());
+    }
+
+    @Test
+    void testFindAll() {
+        when(userRepository.findAll()).thenReturn(Flux.just(User.builder().build()));
+
+        Flux<User> result = userService.findAll();
+
+        StepVerifier.create(result)
+                .expectNextMatches(user -> user.getClass() == User.class)
+                .expectComplete()
+                .verify();
+
+        Mockito.verify(userRepository, times(1)).findAll();
+    }
+
+    @Test
+    void testUpdate() {
+        UserRequest request = new UserRequest("Guimas", "guimas123@.com", "123");
+        User entity = User.builder().build();
+
+        when(mapper.toEntity(any(UserRequest.class), any(User.class))).thenReturn(entity);
+        when(userRepository.findById(anyString())).thenReturn(Mono.just(entity));
+        when(userRepository.save(any(User.class))).thenReturn(Mono.just(entity));
+
+        Mono<User> result = userService.update("123", request);
+
+        StepVerifier.create(result)
+                .expectNextMatches(user -> user.getClass() == User.class)
+                .expectComplete()
+                .verify();
+
+        Mockito.verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    void testDelete() {
+        User entity = User.builder().build();
+        when(userRepository.findAndRemove(anyString())).thenReturn(Mono.just(entity));
+
+        Mono<User> result = userService.delete("123");
+
+        StepVerifier.create(result)
+                .expectNextMatches(user -> user.getClass() == User.class)
+                .expectComplete()
+                .verify();
+
+        Mockito.verify(userRepository, times(1)).findAndRemove(anyString());
     }
 }
