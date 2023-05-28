@@ -179,5 +179,19 @@ class UserControllerImplTest {
 
     @Test
     void delete() {
+        var user = User.builder()
+                .id("testID")
+                .name("Guilherme")
+                .email("guilherm@email.com")
+                .password("123456")
+                .build();
+
+        when(service.delete(anyString())).thenReturn(Mono.just(user));
+
+        webTestClient.delete().uri("/users/" + user.getId())
+                .exchange()
+                .expectStatus().isOk();
+
+        verify(service).delete(anyString());
     }
 }
