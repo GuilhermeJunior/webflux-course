@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -111,8 +112,30 @@ class UserControllerImplTest {
         ;
     }
 
+    // TODO - Test exception when find By Id
+
     @Test
-    void findAll() {
+    @DisplayName("Test find All endpoint with success")
+    void findAllWithSuccess() {
+        var user = User.builder()
+                .id("testID")
+                .name("Guilherme")
+                .email("guilherm@email.com")
+                .password("123456")
+                .build();
+
+        when(service.findAll()).thenReturn(Flux.just(user));
+
+        webTestClient.get().uri("/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].id").isEqualTo(user.getId())
+                .jsonPath("$[0].name").isEqualTo(user.getName())
+                .jsonPath("$[0].password").isEqualTo(user.getPassword())
+                .jsonPath("$[0].email").isEqualTo(user.getEmail())
+        ;
     }
 
     @Test
