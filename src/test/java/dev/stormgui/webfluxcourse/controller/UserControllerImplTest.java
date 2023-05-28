@@ -151,6 +151,30 @@ class UserControllerImplTest {
 
     @Test
     void update() {
+        var request = new UserRequest("Guilherme", "guilherme@email.com", "123");
+        var user = User.builder()
+                .id("testID")
+                .name("Guilherme")
+                .email("guilherm@email.com")
+                .password("123456")
+                .build();
+
+        when(service.update(anyString(), any(UserRequest.class)))
+                .thenReturn(Mono.just(user));
+
+        webTestClient.patch().uri("/users/" + "testID")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(request))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(user.getId())
+                .jsonPath("$.name").isEqualTo(user.getName())
+                .jsonPath("$.password").isEqualTo(user.getPassword())
+                .jsonPath("$.email").isEqualTo(user.getEmail())
+        ;
+
+        verify(service).update(anyString(), any(UserRequest.class));
     }
 
     @Test
