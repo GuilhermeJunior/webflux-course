@@ -57,7 +57,7 @@ class UserControllerImplTest {
     @Test
     @DisplayName("Test endpoint save with success")
     void testSaveWithSuccess() {
-        UserRequest request = new UserRequest("Guilherme", "guilherme@email.com", "123");
+        UserRequest request = getRequestMock();
 
         when(service.save(any(UserRequest.class))).thenReturn(Mono.just(User.builder().build()));
         webTestClient.post().uri("/users")
@@ -92,12 +92,7 @@ class UserControllerImplTest {
     @Test
     @DisplayName("Test find by id endpoint with sucess")
     void findByIdWithSuccess() {
-        var user = User.builder()
-                .id("testID")
-                .name("Guilherme")
-                .email("guilherm@email.com")
-                .password("123456")
-                .build();
+        var user = getUser();
 
         when(service.findById(anyString())).thenReturn(Mono.just(user));
 
@@ -114,6 +109,7 @@ class UserControllerImplTest {
     }
 
     @Test
+    @DisplayName("Test find By with exception")
     void findByIdWithException() {
 //        when(service.findById(anyString())).thenReturn(Mono.empty()); // won't work because I would need to mock the repository
         when(service.findById(anyString())).thenThrow(new ObjectNotFoundException(""));
@@ -128,12 +124,7 @@ class UserControllerImplTest {
     @Test
     @DisplayName("Test find All endpoint with success")
     void findAllWithSuccess() {
-        var user = User.builder()
-                .id("testID")
-                .name("Guilherme")
-                .email("guilherm@email.com")
-                .password("123456")
-                .build();
+        var user = getUser();
 
         when(service.findAll()).thenReturn(Flux.just(user));
 
@@ -150,14 +141,10 @@ class UserControllerImplTest {
     }
 
     @Test
-    void update() {
-        var request = new UserRequest("Guilherme", "guilherme@email.com", "123");
-        var user = User.builder()
-                .id("testID")
-                .name("Guilherme")
-                .email("guilherm@email.com")
-                .password("123456")
-                .build();
+    @DisplayName("Test update with success")
+    void updateWithSuccess() {
+        var request = getRequestMock();
+        var user = getUser();
 
         when(service.update(anyString(), any(UserRequest.class)))
                 .thenReturn(Mono.just(user));
@@ -178,13 +165,9 @@ class UserControllerImplTest {
     }
 
     @Test
-    void delete() {
-        var user = User.builder()
-                .id("testID")
-                .name("Guilherme")
-                .email("guilherm@email.com")
-                .password("123456")
-                .build();
+    @DisplayName("Test delete with success")
+    void deleteWithSuccess() {
+        var user = getUser();
 
         when(service.delete(anyString())).thenReturn(Mono.just(user));
 
@@ -193,5 +176,18 @@ class UserControllerImplTest {
                 .expectStatus().isOk();
 
         verify(service).delete(anyString());
+    }
+
+    private static User getUser() {
+        return User.builder()
+                .id("testID")
+                .name("Guilherme")
+                .email("guilherm@email.com")
+                .password("123456")
+                .build();
+    }
+
+    private static UserRequest getRequestMock() {
+        return new UserRequest("Guilherme", "guilherme@email.com", "123");
     }
 }
