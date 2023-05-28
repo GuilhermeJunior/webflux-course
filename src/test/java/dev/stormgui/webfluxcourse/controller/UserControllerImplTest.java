@@ -5,6 +5,7 @@ import dev.stormgui.webfluxcourse.entity.User;
 import dev.stormgui.webfluxcourse.mapper.UserMapper;
 import dev.stormgui.webfluxcourse.model.request.UserRequest;
 import dev.stormgui.webfluxcourse.service.UserService;
+import dev.stormgui.webfluxcourse.service.exception.ObjectNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -112,7 +113,17 @@ class UserControllerImplTest {
         ;
     }
 
-    // TODO - Test exception when find By Id
+    @Test
+    void findByIdWithException() {
+//        when(service.findById(anyString())).thenReturn(Mono.empty()); // won't work because I would need to mock the repository
+        when(service.findById(anyString())).thenThrow(new ObjectNotFoundException(""));
+
+        webTestClient.get().uri("/users/" + "12345")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
 
     @Test
     @DisplayName("Test find All endpoint with success")
