@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.mongodb.ReactiveMongoDatabaseFactory;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.http.MediaType;
@@ -21,6 +22,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,7 +39,7 @@ class UserControllerImplTest {
     @MockBean
     private UserService service;
 
-    @MockBean
+    @SpyBean
     private UserMapper mapper;
 
     @MockBean
@@ -86,7 +88,27 @@ class UserControllerImplTest {
     }
 
     @Test
-    void findById() {
+    @DisplayName("Test find by id endpoint with sucess")
+    void findByIdWithSuccess() {
+        var user = User.builder()
+                .id("testID")
+                .name("Guilherme")
+                .email("guilherm@email.com")
+                .password("123456")
+                .build();
+
+        when(service.findById(anyString())).thenReturn(Mono.just(user));
+
+        webTestClient.get().uri("/users/" + "testID")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(user.getId())
+                .jsonPath("$.name").isEqualTo(user.getName())
+                .jsonPath("$.password").isEqualTo(user.getPassword())
+                .jsonPath("$.email").isEqualTo(user.getEmail())
+        ;
     }
 
     @Test
